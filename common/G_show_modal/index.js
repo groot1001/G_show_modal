@@ -1,6 +1,7 @@
 /**
  * author:G brother
  * date:20200430
+ * Thank:chunLei所提供的思路和参照
  * **/
 export class show_model{
 	constructor(option={}) {
@@ -17,11 +18,13 @@ export class show_model{
 		let confirmVal=option.confirmVal||'确认';
 		let cancelColor=option.cancelColor||'#0F7EF5';
 		let confirmColor=option.confirmColor||'#0F7EF5';
+		let delCancel=option.delCancel||false;
+		let align=option.align||"center"
 		let fn = ()=>{}
 		this.$event = option.$event || fn
 		
 		//#ifdef APP-PLUS
-		this.creatView({height:`${pageHeight}px`,top:0},opacity,clickEvent,{'tit':model_tit,'concent':model_concent,cancelVal,confirmVal,confirmColor,cancelColor})
+		this.creatView({height:`${pageHeight}px`,top:0},opacity,clickEvent,{'tit':model_tit,'concent':model_concent,cancelVal,confirmVal,confirmColor,cancelColor,delCancel,align})
 		//#endif
 	}
 
@@ -38,25 +41,32 @@ export class show_model{
 			{tag:'rect',id:'modal',color:`rgba(0,0,0,${opa})`,position:{top:'0px',left:'0px',width:'100%',height:'100%'}},
 		    {tag:'rect',id:'concent',color:`rgb(255,255,255)`,rectStyles:{borderWidth:'2px',radius:'5px'},position:{top:'40%',left:'10%',width:'80%',height:'21%'}},
 		    {tag:'font',id:'title',text:modelInfo.tit,textStyles:{size:'20px',color:'#000'},position:{top:'42%',left:'10%',width:'80%',height:'3%'}},
-		    {tag:'font',id:'text',text:modelInfo.concent,textStyles:{size:'16px',color:'#666',whiteSpace:'normal'},position:{top:'43%',left:'14%',width:'72%',height:'11%'}},
+		    {tag:'font',id:'text',text:modelInfo.concent,textStyles:{size:'16px',color:'#666',whiteSpace:'normal',align:modelInfo.align},position:{top:'43%',left:'14%',width:'72%',height:'11%'}},
 		    {tag:'rect',id:'line',color:'#dcdcdc',position:{top:'54%',left:'10%',width:'80%',height:'1px'}},
-			{tag:'rect',id:'line2',color:'#dcdcdc',position:{top:'54%',left:'49%',width:'1px',height:'7%'}}
+			{tag:'rect',id:'line2',color:'#dcdcdc',position:{top:'54%',left:'49%',width:modelInfo.delCancel?'0px':'1px',height:modelInfo.delCancel?'0px':'7%'}}
 			
 		]);
-		let viewCancel=new plus.nativeObj.View('cancel',{width:'38%',height:'5%',top:'55%',left:'11%',backgroundColor:'#ffffff'});
-		let viewconfirm=new plus.nativeObj.View('confirm',{width:'38%',height:'5%',top:'55%',left:'51%',backgroundColor:'#ffffff'});
-			 viewCancel.draw([
-				  {tag:'font',id:'cancel',text:modelInfo.cancelVal,textStyles:{color:modelInfo.cancelColor,size:'18px'}},
-				 ]);
-	          	viewconfirm.draw([
-				 {tag:'font',id:'confirm',text:modelInfo.confirmVal,textStyles:{color:modelInfo.confirmColor,size:'18px'}},
-				]);
+
+		if(!modelInfo.delCancel){
 			// 取消	
-			viewCancel.addEventListener("click",(e)=>{
-				this.$event({res:false,types:'cancel'});
-				this.hide()
-			},false);
-			// 确认
+			let viewCancel=new plus.nativeObj.View('cancel',{width:'38%',height:'5%',top:'55%',left:'11%',backgroundColor:'#ffffff'});
+			    viewCancel.draw([
+				  {tag:'font',id:'cancel',text:modelInfo.cancelVal,textStyles:{color:modelInfo.cancelColor,size:'18px'}},
+				]);
+				
+				viewCancel.addEventListener("click",(e)=>{
+					this.$event({res:false,types:'cancel'});
+					this.hide()
+				},false);
+				this.cancelModel=viewCancel;
+		}
+		
+		// 确认
+		let viewconfirm=new plus.nativeObj.View('confirm',{width:modelInfo.delCancel?'80%':'38%',height:'5%',top:'55%',left:modelInfo.delCancel?'10%':'51%',backgroundColor:'#ffffff'});
+	        viewconfirm.draw([
+			  {tag:'font',id:'confirm',text:modelInfo.confirmVal,textStyles:{color:modelInfo.confirmColor,size:'18px'}},
+			]);
+		
 			viewconfirm.addEventListener("click",(e)=>{
 				this.$event({res:true,types:'confirm'});
 				this.hide();
@@ -70,7 +80,6 @@ export class show_model{
 			}, false);
 		}
 	   this.bodyModel=view;
-	   this.cancelModel=viewCancel;
 	   this.confirmModel=viewconfirm;
 	}
     showModalAnimationClose(){
@@ -89,17 +98,21 @@ export class show_model{
 				plus.nativeObj.View.clearAnimation();
 			});
 	}
-	show(time=300){
+	show(){
 		this.showModalAnimationOpen();
 		this.bodyModel.show();
-		this.cancelModel.show();
+		if(this.cancelModel){
+			this.cancelModel.show();
+		}
 		this.confirmModel.show();
 	
 	}
 	hide(){
 		this.showModalAnimationClose();
 		this.bodyModel.hide();
-		this.cancelModel.hide();
+		if(this.cancelModel){
+	      this.cancelModel.hide();	
+		}
 		this.confirmModel.hide();
 		
 		

@@ -15,13 +15,16 @@
 			}
 		},
 		onLoad() {
-          this.$showModal({concent:'测试测试~'}).then(res=>{
-          	console.log(res);
-          	//确认
-          }).catch(res=>{
-          	//取消
-          	console.log(res);
-          })
+        
+		},
+		onShow() {
+			this.$showModal({concent:'测试测试~',delCancel:true,confirmVal:'知道了',align:'left'}).then(res=>{
+				console.log(res);
+				//确认
+			}).catch(res=>{
+				//取消
+				console.log(res);
+			})
 		},
 		methods: {
 
